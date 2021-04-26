@@ -9,7 +9,7 @@ const execSQL = async (sql) => {
 
   // console.log(' env: ', process.env)
 
-  const con = mysql.createConnection({
+  const con = mysql.createConnection({ 
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
