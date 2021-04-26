@@ -1,0 +1,29 @@
+{
+  "name": "mnt-back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caiocosta08/mnt-back-end.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caiocosta08/mnt-back-end/issues"
+  },
+  "homepage": "https://github.com/caiocosta08/mnt-back-end#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "chalk": "^4.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "md5": "^2.3.0",
+    "mysql2": "^2.2.5"
+  }
+}
