@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
     // let consultations = await execSQL("SELECT consultations.id, consultations.name, consultations.email, user_types.title as user_type, signatures.status as signature_status, signatures.expiration_date as signature_expiration_date FROM consultations INNER JOIN user_types ON consultations.id_type = user_types.id INNER JOIN signatures ON consultations.id_signature = signatures.id");
 
     console.log(chalk.bgBlue('QUERY AT ', new Date()));
-    console.log('consultations ->', consultations);
+    // console.log('consultations ->', consultations);
 
     if (consultations.length <= 0) return res.send({ error: 'Nenhuma consulta encontrada' });
 
@@ -39,15 +39,32 @@ router.post("/schedule", async (req, res) => {
 
   try {
 
-    let consultation = req.body.consultation;
+    let { id_user_client, psychologist, date, id_default_time } = req.body;
+    console.log({id_default_time})
+
+    if(!id_user_client || !psychologist || !date || !id_default_time) return res.status(400).send({ error: "Id user client, psychologist, date or id_default_time not provided", error_code: "001"});
+
+    let id_user_psychologist = psychologist.id;
     let now = new Date();
 
-    let new_consultation = await execSQL("INSERT INTO consultations (description, id_user_client, id_user_psychologist, date, status, updated_at) VALUES ('" + consultation.description + "', '" + consultation.id_user_client + "', '" + consultation.id_user_psychologist + "', '" + now + "', 'scheduled', '" + now + "')");
+    let new_consultation = await execSQL("INSERT INTO consultations (id_user_client, id_user_psychologist, date, status, updated_at, id_default_time) VALUES ('" + id_user_client + "', '" + id_user_psychologist + "', '" + date + "', 'scheduled', '" + now + "', '" + id_default_time + "' )");
 
     if (!new_consultation) return res.send({ error: "Não foi possível agendar a consulta" });
-    consultation.id = new_consultation.insertId;
 
-    return res.send({ consultation });
+    let credits = await execSQL("SELECT consultations_credits FROM users WHERE id='" + id_user_client + "' ");
+    credits = parseInt(credits[0].consultations_credits);
+    credits = credits - 1;
+    let new_credits = await execSQL("UPDATE users SET consultations_credits='" + (credits) + "' WHERE id= '" + id_user_client + "' ");
+
+    let scheduled_consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
+      + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
+      + " FROM consultations"
+      + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
+      + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
+      + " WHERE consultations.id_user_client='" + id_user_client + "'  AND consultations.status='scheduled' "));
+
+    return res.send({ scheduled_consultations, consultations_credits: credits });
 
   } catch (error) {
     console.log({ error })
@@ -93,14 +110,16 @@ router.post("/cancel", async (req, res) => {
     let now = new Date();
 
     new_consultation = await execSQL("UPDATE consultations SET status='canceled', updated_at='" + now + "' WHERE id='" + consultation.id + "'");
-    let credits = await execSQL("SELECT consultations_credits FROM users WHERE id='" + consultation.id_user_client + "' ");
-    credits = parseInt(credits[0].consultations_credits);
-    credits = credits + 1;
-    let new_credits = await execSQL("UPDATE users SET consultations_credits='" + (credits) + "' WHERE id= '" + consultation.id_user_client + "' ");
 
     if (!new_consultation) return res.send({ error: "Não foi possível cancelar a consulta", error_code: "002" });
 
     let canceled = await execSQL("INSERT INTO cancellations (id_user_client, id_consultation, text) VALUES ('" + consultation.id_user_client + "', '" + consultation.id + "', '" + consultation.text + "')");
+
+
+    let credits = await execSQL("SELECT consultations_credits FROM users WHERE id='" + consultation.id_user_client + "' ");
+    credits = parseInt(credits[0].consultations_credits);
+    credits = credits + 1;
+    let new_credits = await execSQL("UPDATE users SET consultations_credits='" + (credits) + "' WHERE id= '" + consultation.id_user_client + "' ");
 
     let scheduled_consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
       + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
@@ -136,7 +155,7 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + user_id + "'"));
     if (!consultations) return res.status(400).send({ error: "Não foi possível encontrar as consultas", error_code: "001" });
-    console.log({ consultations })
+    // console.log({ consultations })
 
     return res.send({ consultations });
 
@@ -165,7 +184,7 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + user_id + "' AND consultations.status='scheduled' "));
     if (!scheduled_consultations) return res.status(400).send({ error: "Não foi possível encontrar as consultas", error_code: "001" });
-    console.log({ scheduled_consultations })
+    // console.log({ scheduled_consultations })
 
     return res.send({ scheduled_consultations });
 
