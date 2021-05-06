@@ -39,30 +39,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-// router.post("/schedule", async (req, res) => {
-//   console.log(chalk.bgMagenta('[ post /lessons/schedule - lessons.controller ]'));
-//   console.log(chalk.magenta(JSON.stringify(req.body)));
-
-//   try {
-
-//     let lesson = req.body.lesson;
-//     let now = new Date();
-
-//     let new_lesson = await execSQL("INSERT INTO lessons (description, id_user_client, id_user_driver, date, status, updated_at) VALUES ('" + lesson.description + "', '" + lesson.id_user_client + "', '" + lesson.id_user_driver + "', '" + now + "', 'scheduled', '" + now + "')");
-
-//     if (!new_lesson) return res.send({ error: "Não foi possível agendar a aula" });
-//     lesson.id = new_lesson.insertId;
-
-//     return res.send({ lesson });
-
-//   } catch (error) {
-//     console.log({ error })
-//     res.status(400).send({ error: error });
-//   }
-// });
-
-
 router.post("/cancel", async (req, res) => {
   console.log(chalk.bgMagenta('[ post /lessons/cancel - lessons.controller ]'));
   console.log(chalk.magenta(JSON.stringify(req.body)));
@@ -70,17 +46,39 @@ router.post("/cancel", async (req, res) => {
   try {
 
     let lesson = req.body.lesson;
+    if (!lesson.id || !lesson.id_user_client || !lesson.text) return res.status(400).send({ error: "Lesson id, id_user_client or text not provided." });
+
+    let new_lesson = await execSQL("SELECT status FROM lessons WHERE id= '" + lesson.id + "' ");
+    let status = new_lesson[0].status;
+    if (status == "canceled") return res.status(400).send({ error: "Aula já cancelada anteriormente.", error_code: "001" });
+
     let now = new Date();
 
-    let new_lesson = await execSQL("UPDATE lessons SET description='" + lesson.description + "', status='canceled', updated_at='" + now + "' WHERE id='" + lesson.id + "'");
+    new_lesson = await execSQL("UPDATE lessons SET status='canceled', updated_at='" + now + "' WHERE id='" + lesson.id + "'");
+    let credits = await execSQL("SELECT classes_credits FROM users WHERE id='" + lesson.id_user_client + "' ");
+    credits = parseInt(credits[0].classes_credits);
+    credits = credits + 1;
+    let new_credits = await execSQL("UPDATE users SET classes_credits='" + (credits) + "' WHERE id= '" + lesson.id_user_client + "' ");
 
-    if (!new_lesson) return res.send({ error: "Não foi possível cancelar a aula" });
+    if (!new_lesson) return res.send({ error: "Não foi possível cancelar a aula", error_code: "002" });
 
-    return res.send({ lesson });
+    let canceled = await execSQL("INSERT INTO cancellations (id_user_client, id_lesson, text) VALUES ('" + lesson.id_user_client + "', '" + lesson.id + "', '" + lesson.text + "')");
+
+    let scheduled_lessons = (await execSQL("SELECT lessons.id, description, id_user_client"
+      + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
+      + " WHERE lessons.id_user_client='" + lesson.id_user_client + "'  AND lessons.status='scheduled' "));
+
+    return res.send({ scheduled_lessons, classes_credits: credits });
 
   } catch (error) {
     console.log({ error })
-    res.status(400).send({ error: error });
+    res.status(400).send({ error: error, error_code: "003" });
   }
 });
 
@@ -98,17 +96,51 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
     let lessons = (await execSQL("SELECT lessons.id, description, id_user_client"
       + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
       + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
       + " FROM lessons"
       + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
       + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
       + " WHERE lessons.id_user_client='" + user_id + "'"));
-    if (!lessons) return res.status(400).send({ error: "Não foi possível encontrar as aulas" });
+    if (!lessons) return res.status(400).send({ error: "Não foi possível encontrar as aulas", error_code: "001" });
+    console.log({ lessons })
 
     return res.send({ lessons });
 
   } catch (error) {
     console.log({ error })
-    res.status(400).send({ error: error });
+    res.status(400).send({ error: error, error_code: "002" });
+  }
+});
+
+
+router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
+  console.log(chalk.bgMagenta('[ post /lessons/get_all_scheduled_by_id_user_client - lessons.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+
+  try {
+
+    let { user_id } = req.body;
+
+    // let lessons = await execSQL("SELECT * FROM lessons INNER JOIN default_times ON default_times.id=lessons.id_default_time WHERE id_user_client = '" + user.id + "'");
+
+    let scheduled_lessons = (await execSQL("SELECT lessons.id, description, id_user_client"
+      + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
+      + " WHERE lessons.id_user_client='" + user_id + "' AND lessons.status='scheduled' "));
+    if (!scheduled_lessons) return res.status(400).send({ error: "Não foi possível encontrar as aulas", error_code: "001" });
+    console.log({ scheduled_lessons })
+
+    return res.send({ scheduled_lessons });
+
+  } catch (error) {
+    console.log({ error })
+    res.status(400).send({ error: error, error_code: "002" });
   }
 });
 
@@ -123,12 +155,16 @@ router.post("/schedule", async (req, res) => {
     if (date == getFormattedDate(date)) { }
     else date = getFormattedDate(date);
 
-    let credits = await execSQL("SELECT classes_credits FROM users WHERE id='" + id_user_client + "' LIMIT 1")[0];
-    credits = credits.classes_credits;
-    console.log({ credits });
-    if (credits <= 0) return res.status(400).send({ error: "Você não possui créditos" });
+    let alreadyScheduled = await execSQL("SELECT * FROM lessons WHERE date='" + date + "' AND id_default_time='" + id_default_time + "' AND status='scheduled' ");
+    if (alreadyScheduled?.length > 0) return res.status(400).send({ error: "Horário indisponível para o usuário", error_code: "005" });
 
-    let drivers = await execSQL("SELECT * FROM users WHERE is_driver='true'");
+    let credits = await execSQL("SELECT * FROM users WHERE id='" + id_user_client + "' LIMIT 1");
+    credits = parseInt(credits[0].classes_credits);
+    console.log({ credits })
+
+    if (credits <= 0) return res.status(400).send({ error: "Você não possui créditos", error_code: "001" });
+
+    let drivers = await execSQL("SELECT * FROM users WHERE is_driver=1 ");
     let unavailableDrivers = await execSQL("SELECT id_user_driver FROM lessons WHERE date='" + date + "' AND id_default_time='" + id_default_time + "'");
 
     unavailableDrivers.map((un, index) => {
@@ -141,26 +177,41 @@ router.post("/schedule", async (req, res) => {
 
     let indexOfRandomDriver = (Math.floor(Math.random() * (drivers.length) + 1) - 1);
     let selectedDriver = drivers[indexOfRandomDriver];
+    console.log({ selectedDriver })
 
-    if (!selectedDriver) return res.status(400).send({ error: "Não foi possível agendar a aula. Nenhum motorista disponível." });
+    if (!selectedDriver) return res.status(400).send({ error: "Não foi possível agendar a aula. Nenhum motorista disponível.", error_code: "002" });
 
     let now = new Date();
     let new_lesson = await execSQL("INSERT INTO lessons (id_default_time, id_user_client, id_user_driver, date, status, updated_at, starting_point) VALUES ('" + id_default_time + "', '" + id_user_client + "', '" + selectedDriver.id + "', '" + date + "', 'scheduled', '" + now + "', '" + starting_point + "')");
+    console.log({ new_lesson })
 
-    if (!new_lesson) return res.send({ error: "Não foi possível agendar a aula" });
+    if (!new_lesson) return res.send({ error: "Não foi possível agendar a aula", error_code: "003" });
 
     let lesson = (await execSQL("SELECT lessons.id, description, id_user_client, id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
       + "FROM lessons INNER JOIN default_times ON default_times.id=lessons.id_default_time WHERE lessons.id='" + new_lesson.insertId + "'"))[0];
     lesson.driver = selectedDriver;
 
-    await execSQL("UPDATE users SET classes_credits = '" + credits - 1 + "' WHERE id = '" + id_user_client + "'");
+    let new_credits = await execSQL("UPDATE users SET classes_credits = '" + (credits - 1) + "' WHERE id = '" + id_user_client + "'");
+    credits = credits - 1;
+    console.log({ new_credits })
+    console.log({ id_user_client })
 
-    console.log({ lesson })
-    return res.send({ lesson });
+    let scheduled_lessons = (await execSQL("SELECT lessons.id, description, id_user_client"
+      + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
+      + " WHERE lessons.id_user_client='" + id_user_client + "' AND lessons.status='scheduled' "));
+
+    console.log({ scheduled_lessons, classes_credits: credits })
+    return res.send({ scheduled_lessons, classes_credits: credits });
 
   } catch (error) {
     console.log({ error })
-    res.status(400).send({ error: error });
+    res.status(400).send({ error: error, error_code: "004" });
   }
 });
 

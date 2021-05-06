@@ -50,18 +50,33 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(401).send({ message: 'Usuário ou senha incorretos' });
     }
+    console.log(user);
 
     //set user is logged
     (await execSQL("UPDATE users SET is_logged='true' WHERE id='" + user.id + "'"));
 
-    let lessons = await execSQL(SQL_FOR_GET_LESSONS + " WHERE lessons.id_user_client = '" + user.id + "' ORDER BY lessons.date ASC");
+    // let lessons = await execSQL(SQL_FOR_GET_LESSONS + " WHERE lessons.id_user_client = '" + user.id + "' ORDER BY lessons.date ASC");
     // console.log({ lessons })
+    let lessons = (await execSQL("SELECT lessons.id, description, id_user_client"
+      + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
+      + " WHERE lessons.id_user_client='" + user.id + "' ORDER BY lessons.date ASC"));
+
     lessons = lessons.map(l => {
+      console.log(l.date)
       l.type = "lesson";
       return l
     })
 
     lessons = lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+
+    console.log({ lessons })
+
     let consultations = await execSQL(SQL_FOR_GET_CONSULTATIONS + " WHERE id_user_client = '" + user.id + "'");
     consultations = consultations.map(c => {
       c.type = "consultation";
@@ -140,6 +155,83 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     console.log('erro, ', error)
     res.status(400).send({ error: error })
+  }
+
+});
+
+router.post("/buy_classes_credits", async (req, res) => {
+  console.log(chalk.bgMagenta('[ post /users/buy_credits - users.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+    let { paymentInfo, user, newCredits } = req.body;
+    if (!paymentInfo || !newCredits) return res.status(400).send({ error: "Payment info or new credits not provided" });
+    if (!user || !user.id) return res.status(400).send({ error: "User info not provided" });
+    if (!paymentInfo.creditCard || !paymentInfo.creditCard.client_name || !paymentInfo.creditCard.number || !paymentInfo.creditCard.expiration_date || !paymentInfo.creditCard.security_code)
+      return res.status(400).send({ error: "Credit card info not provided" });
+
+    let credits = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    credits = parseInt(credits[0].classes_credits);
+    newCredits.credits = parseInt(newCredits.credits);
+    credits = await execSQL("UPDATE users SET classes_credits= '" + (credits + newCredits.credits) + "' WHERE id= '" + user.id + "' ");
+    user = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    user = user[0]
+    // Retorna os dados do usuário e o new token para ser usado na próxima requisição
+    return res.send({
+      user
+    });
+  } catch (error) {
+    console.log('erro, ', error)
+    res.status(400).send({ error: error })
+  }
+
+});
+
+
+router.post("/buy_consultations_credits", async (req, res) => {
+  console.log(chalk.bgMagenta('[ post /users/buy_consultations_credits - users.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+    let { paymentInfo, user, newCredits } = req.body;
+    if (!paymentInfo || !newCredits) return res.status(400).send({ error: "Payment info or new credits not provided" });
+    if (!user || !user.id) return res.status(400).send({ error: "User info not provided" });
+    if (!paymentInfo.creditCard || !paymentInfo.creditCard.client_name || !paymentInfo.creditCard.number || !paymentInfo.creditCard.expiration_date || !paymentInfo.creditCard.security_code)
+      return res.status(400).send({ error: "Credit card info not provided" });
+
+    let credits = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    credits = parseInt(credits[0].consultations_credits);
+    newCredits.credits = parseInt(newCredits.credits);
+    credits = await execSQL("UPDATE users SET consultations_credits= '" + (credits + newCredits.credits) + "' WHERE id= '" + user.id + "' ");
+    user = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    user = user[0]
+    // Retorna os dados do usuário e o new token para ser usado na próxima requisição
+    return res.send({
+      user
+    });
+  } catch (error) {
+    console.log('erro, ', error)
+    res.status(400).send({ error: error })
+  }
+
+});
+
+
+router.post("/get_all_psychologists", async (req, res) => {
+  console.log(chalk.bgMagenta('[ post /users/get_all_psychologists - users.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+
+    let psychologists = await execSQL("SELECT * FROM users WHERE is_psychologist='1' ");
+    if (!psychologists) return res.status(400).send({ error: "Não foi possível carregar os psicólogos.", error_code: "001" });
+
+    console.log({psychologists});
+
+    // Retorna os dados do usuário e o new token para ser usado na próxima requisição
+    return res.send({
+      psychologists
+    });
+  } catch (error) {
+    console.log(error)
+    res.status(400).send({ error: error, error_code: "002" })
   }
 
 });
