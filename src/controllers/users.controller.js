@@ -271,6 +271,26 @@ router.post("/get_all_psychologists", async (req, res) => {
 
 });
 
+router.post("/delete", async (req, res) => {
+  console.log(chalk.bgMagenta('[ post /users/delete - users.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+
+    let { id } = req.body.user;
+
+    let status = await execSQL("DELETE FROM users WHERE id='" + id + "' LIMIT 1 ");
+    if (!status) return res.status(400).send({ error: "Não foi possível excluir o usuário", error_code: "001" });
+    else if (status) status = true;
+
+    return res.send({
+      status
+    });
+  } catch (error) {
+    res.status(400).send({ error: error })
+  }
+});
+
+
 
 
 module.exports = (app) => app.use("/users", router);

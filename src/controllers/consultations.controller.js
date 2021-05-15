@@ -40,9 +40,9 @@ router.post("/schedule", async (req, res) => {
   try {
 
     let { id_user_client, psychologist, date, id_default_time } = req.body;
-    console.log({id_default_time})
+    console.log({ id_default_time })
 
-    if(!id_user_client || !psychologist || !date || !id_default_time) return res.status(400).send({ error: "Id user client, psychologist, date or id_default_time not provided", error_code: "001"});
+    if (!id_user_client || !psychologist || !date || !id_default_time) return res.status(400).send({ error: "Id user client, psychologist, date or id_default_time not provided", error_code: "001" });
 
     let id_user_psychologist = psychologist.id;
     let now = new Date();
@@ -50,6 +50,14 @@ router.post("/schedule", async (req, res) => {
     let new_consultation = await execSQL("INSERT INTO consultations (id_user_client, id_user_psychologist, date, status, updated_at, id_default_time) VALUES ('" + id_user_client + "', '" + id_user_psychologist + "', '" + date + "', 'scheduled', '" + now + "', '" + id_default_time + "' )");
 
     if (!new_consultation) return res.send({ error: "Não foi possível agendar a consulta" });
+
+    new_consultation = (await execSQL("SELECT consultations.id, description, id_user_client"
+      + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
+      + " FROM consultations"
+      + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
+      + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
+      + " WHERE id='" + new_consultation.insertId + "' "))[0];
 
     let credits = await execSQL("SELECT consultations_credits FROM users WHERE id='" + id_user_client + "' ");
     credits = parseInt(credits[0].consultations_credits);
@@ -64,7 +72,7 @@ router.post("/schedule", async (req, res) => {
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + id_user_client + "'  AND consultations.status='scheduled' "));
 
-    return res.send({ scheduled_consultations, consultations_credits: credits });
+    return res.send({ scheduled_consultations, consultations_credits: credits, last_consultations_scheduled: new_consultation });
 
   } catch (error) {
     console.log({ error })

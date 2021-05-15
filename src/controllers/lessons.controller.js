@@ -187,9 +187,19 @@ router.post("/schedule", async (req, res) => {
 
     if (!new_lesson) return res.send({ error: "Não foi possível agendar a aula", error_code: "003" });
 
-    let lesson = (await execSQL("SELECT lessons.id, description, id_user_client, id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
-      + "FROM lessons INNER JOIN default_times ON default_times.id=lessons.id_default_time WHERE lessons.id='" + new_lesson.insertId + "'"))[0];
-    lesson.driver = selectedDriver;
+    // let lesson = (await execSQL("SELECT lessons.id, description, id_user_client, id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+    //   + "FROM lessons INNER JOIN default_times ON default_times.id=lessons.id_default_time WHERE lessons.id='" + new_lesson.insertId + "'"))[0];
+    // lesson.driver = selectedDriver;
+
+    let lesson = (await execSQL("SELECT lessons.id, description, id_user_client"
+      + ", id_user_driver, date, status, starting_point, default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.email as driver_email"
+      + ", cars.model as car_model, cars.license_plate as car_license_plate, cars.brand as car_brand"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"
+      + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
+      + " WHERE lessons.id='" + new_lesson.insertId + "' "))[0];
 
     let new_credits = await execSQL("UPDATE users SET classes_credits = '" + (credits - 1) + "' WHERE id = '" + id_user_client + "'");
     credits = credits - 1;
@@ -207,7 +217,7 @@ router.post("/schedule", async (req, res) => {
       + " WHERE lessons.id_user_client='" + id_user_client + "' AND lessons.status='scheduled' "));
 
     console.log({ scheduled_lessons, classes_credits: credits })
-    return res.send({ scheduled_lessons, classes_credits: credits });
+    return res.send({ scheduled_lessons, classes_credits: credits, last_lesson_scheduled: lesson });
 
   } catch (error) {
     console.log({ error })
