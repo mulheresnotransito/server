@@ -72,6 +72,12 @@ router.post("/schedule", async (req, res) => {
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + id_user_client + "'  AND consultations.status='scheduled' "));
 
+    scheduled_consultations = scheduled_consultations.map(c => {
+      c.type = "consultation";
+      return c
+    })
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+
     return res.send({ scheduled_consultations, consultations_credits: credits, last_consultations_scheduled: new_consultation });
 
   } catch (error) {
@@ -137,6 +143,12 @@ router.post("/cancel", async (req, res) => {
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + consultation.id_user_client + "'  AND consultations.status='scheduled' "));
 
+    scheduled_consultations = scheduled_consultations.map(c => {
+      c.type = "consultation";
+      return c
+    })
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+
     return res.send({ scheduled_consultations, consultations_credits: credits });
 
   } catch (error) {
@@ -153,6 +165,8 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
 
     let { user_id } = req.body;
 
+    if (!user_id) return res.status(400).send({ error: "user_id not provided", error_code: "001" });
+
     // let consultations = await execSQL("SELECT * FROM consultations INNER JOIN default_times ON default_times.id=consultations.id_default_time WHERE id_user_client = '" + user.id + "'");
 
     let consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
@@ -162,8 +176,14 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
       + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
       + " WHERE consultations.id_user_client='" + user_id + "'"));
-    if (!consultations) return res.status(400).send({ error: "Não foi possível encontrar as consultas", error_code: "001" });
-    // console.log({ consultations })
+    if (!consultations) return res.status(400).send({ error: "Não foi possível encontrar as consultas", error_code: "002" });
+    console.log({ consultations })
+
+    consultations = consultations.map(c => {
+      c.type = "consultation";
+      return c
+    })
+    consultations = consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
 
     return res.send({ consultations });
 
@@ -193,6 +213,12 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
       + " WHERE consultations.id_user_client='" + user_id + "' AND consultations.status='scheduled' "));
     if (!scheduled_consultations) return res.status(400).send({ error: "Não foi possível encontrar as consultas", error_code: "001" });
     // console.log({ scheduled_consultations })
+
+    scheduled_consultations = scheduled_consultations.map(c => {
+      c.type = "consultation";
+      return c
+    })
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
 
     return res.send({ scheduled_consultations });
 

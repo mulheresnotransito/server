@@ -133,6 +133,7 @@ router.post("/register", async (req, res) => {
   console.log(chalk.magenta(JSON.stringify(req.body)));
   try {
     let user = req.body.user;
+    console.log({userToRegister: user})
 
     if (!user.is_driver) user.is_driver = 0;
     if (!user.is_psychologist) user.is_psychologist = 0;
@@ -140,7 +141,7 @@ router.post("/register", async (req, res) => {
 
     // // Verifica se o usuário enviado já existe 
     let user_db = await execSQL("SELECT * FROM users WHERE email='" + user.email + "'");
-    // console.log(user_db)
+    console.log({user_db})
     // Se já existir, retorna com a mensagem de erro
     if (user_db.length != 0) return res.status(400).send({ error: "O usuário já existe", error_code: "001" });
 

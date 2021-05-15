@@ -74,6 +74,14 @@ router.post("/cancel", async (req, res) => {
       + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
       + " WHERE lessons.id_user_client='" + lesson.id_user_client + "'  AND lessons.status='scheduled' "));
 
+    scheduled_lessons = scheduled_lessons.map(l => {
+      console.log(l.date)
+      l.type = "lesson";
+      return l
+    })
+
+    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+
     return res.send({ scheduled_lessons, classes_credits: credits });
 
   } catch (error) {
@@ -104,6 +112,13 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
       + " WHERE lessons.id_user_client='" + user_id + "'"));
     if (!lessons) return res.status(400).send({ error: "Não foi possível encontrar as aulas", error_code: "001" });
     console.log({ lessons })
+    lessons = lessons.map(l => {
+      console.log(l.date)
+      l.type = "lesson";
+      return l
+    })
+
+    lessons = lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
 
     return res.send({ lessons });
 
@@ -135,6 +150,14 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
       + " WHERE lessons.id_user_client='" + user_id + "' AND lessons.status='scheduled' "));
     if (!scheduled_lessons) return res.status(400).send({ error: "Não foi possível encontrar as aulas", error_code: "001" });
     console.log({ scheduled_lessons })
+
+    scheduled_lessons = scheduled_lessons.map(l => {
+      console.log(l.date)
+      l.type = "lesson";
+      return l
+    })
+
+    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
 
     return res.send({ scheduled_lessons });
 
@@ -215,6 +238,14 @@ router.post("/schedule", async (req, res) => {
       + " INNER JOIN users ON users.id=lessons.id_user_driver"
       + " INNER JOIN cars ON cars.id_user=lessons.id_user_driver"
       + " WHERE lessons.id_user_client='" + id_user_client + "' AND lessons.status='scheduled' "));
+
+      scheduled_lessons = scheduled_lessons.map(l => {
+        console.log(l.date)
+        l.type = "lesson";
+        return l
+      })
+  
+      scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
 
     console.log({ scheduled_lessons, classes_credits: credits })
     return res.send({ scheduled_lessons, classes_credits: credits, last_lesson_scheduled: lesson });
