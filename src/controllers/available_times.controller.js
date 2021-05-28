@@ -76,7 +76,7 @@ router.post("/add_multiple_hours", async (req, res) => {
   try {
 
     let { id_user, available_times } = req.body;
-    if (!id_user || !available_times || available_times?.length == 0) return res.status(400).send({ error: "user_id ou available_times não fornecidos" });
+    if (!id_user || !available_times || available_times.length == 0) return res.status(400).send({ error: "user_id ou available_times não fornecidos" });
 
     available_times.map(async (t) => {
       try {

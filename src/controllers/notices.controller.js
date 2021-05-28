@@ -30,7 +30,7 @@ router.post("/new", async (req, res) => {
   try {
 
     let notice = req.body;
-    if (!notice?.title || !notice?.text || !notice?.description) return res.status(400).send({ error: "Title or text not provided." });
+    if (!notice.title || !notice.text || !notice.description) return res.status(400).send({ error: "Title or text not provided." });
 
     notice.title = (notice.title).replace(/'/g, "''");
     notice.text = (notice.text).replace(/'/g, "''");

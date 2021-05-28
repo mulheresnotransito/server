@@ -179,7 +179,7 @@ router.post("/schedule", async (req, res) => {
     else date = getFormattedDate(date);
 
     let alreadyScheduled = await execSQL("SELECT * FROM lessons WHERE date='" + date + "' AND id_default_time='" + id_default_time + "' AND status='scheduled' ");
-    if (alreadyScheduled?.length > 0) return res.status(400).send({ error: "Horário indisponível para o usuário", error_code: "005" });
+    if (alreadyScheduled.length > 0) return res.status(400).send({ error: "Horário indisponível para o usuário", error_code: "005" });
 
     let credits = await execSQL("SELECT * FROM users WHERE id='" + id_user_client + "' LIMIT 1");
     credits = parseInt(credits[0].classes_credits);

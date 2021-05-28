@@ -76,7 +76,7 @@ router.post("/add_multiple_hours", async (req, res) => {
   try {
 
     let { id_user, default_times } = req.body;
-    if (!id_user || !default_times || default_times?.length == 0) return res.status(400).send({ error: "user_id ou default_times não fornecidos" });
+    if (!id_user || !default_times || default_times.length == 0) return res.status(400).send({ error: "user_id ou default_times não fornecidos" });
 
     default_times.map(async (t) => {
       try {
