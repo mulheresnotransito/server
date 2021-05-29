@@ -74,9 +74,11 @@ router.post("/schedule", async (req, res) => {
 
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
+      c.temp_date = c.date.split("/");
       return c
     })
-    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_consultations, consultations_credits: credits, last_consultations_scheduled: new_consultation });
 
@@ -145,9 +147,11 @@ router.post("/cancel", async (req, res) => {
 
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
+      c.temp_date = c.date.split("/");
       return c
     })
-    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_consultations, consultations_credits: credits });
 
@@ -181,9 +185,12 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
 
     consultations = consultations.map(c => {
       c.type = "consultation";
+      c.temp_date = c.date.split("/");
       return c
     })
-    consultations = consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // consultations = consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // consultations.map((c, index) => console.log(c.id, index));
+    consultations = consultations.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ consultations });
 
@@ -216,9 +223,12 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
 
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
+      c.temp_date = c.date.split("/");
       return c
     })
-    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // scheduled_consultations.map((c, index) => console.log(c.id, c.date, new Date(c.date), index));
+    scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_consultations });
 
