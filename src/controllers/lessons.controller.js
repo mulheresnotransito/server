@@ -77,10 +77,12 @@ router.post("/cancel", async (req, res) => {
     scheduled_lessons = scheduled_lessons.map(l => {
       console.log(l.date)
       l.type = "lesson";
+      l.temp_date = l.date.split("/");
       return l
     })
 
-    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+    // scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_lessons, classes_credits: credits });
 
@@ -115,10 +117,12 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
     lessons = lessons.map(l => {
       console.log(l.date)
       l.type = "lesson";
+      l.temp_date = l.date.split("/");
       return l
     })
 
-    lessons = lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    // lessons = lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+    lessons = lessons.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ lessons });
 
@@ -154,10 +158,12 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
     scheduled_lessons = scheduled_lessons.map(l => {
       console.log(l.date)
       l.type = "lesson";
+      l.temp_date = l.date.split("/");
       return l
     })
 
-    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+    // scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+    scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_lessons });
 
@@ -242,10 +248,12 @@ router.post("/schedule", async (req, res) => {
       scheduled_lessons = scheduled_lessons.map(l => {
         console.log(l.date)
         l.type = "lesson";
+        l.temp_date = l.date.split("/");
         return l
       })
   
-      scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+      // scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse();
+      scheduled_lessons = scheduled_lessons.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     console.log({ scheduled_lessons, classes_credits: credits })
     return res.send({ scheduled_lessons, classes_credits: credits, last_lesson_scheduled: lesson });
