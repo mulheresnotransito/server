@@ -134,7 +134,7 @@ router.post("/register", async (req, res) => {
   console.log(chalk.magenta(JSON.stringify(req.body)));
   try {
     let user = req.body.user;
-    console.log({userToRegister: user})
+    console.log({ userToRegister: user })
 
     if (!user.is_driver) user.is_driver = 0;
     if (!user.is_psychologist) user.is_psychologist = 0;
@@ -142,7 +142,7 @@ router.post("/register", async (req, res) => {
 
     // // Verifica se o usuário enviado já existe 
     let user_db = await execSQL("SELECT * FROM users WHERE email='" + user.email + "'");
-    console.log({user_db})
+    console.log({ user_db })
     // Se já existir, retorna com a mensagem de erro
     if (user_db.length != 0) return res.status(400).send({ error: "O usuário já existe", error_code: "001" });
 
@@ -197,68 +197,79 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/buy_classes_credits", async (req, res) => {
-  console.log(chalk.bgMagenta('[ post /users/buy_credits - users.controller ]'));
+  console.log(chalk.bgMagenta('[ post /users/buy_classes_credits - users.controller ]'));
   console.log(chalk.magenta(JSON.stringify(req.body)));
   try {
     let { paymentInfo, user, newCredits } = req.body;
-    if (!paymentInfo || !newCredits) return res.status(400).send({ error: "Payment info or new credits not provided" });
-    if (!user || !user.id) return res.status(400).send({ error: "User info not provided" });
-    if (!paymentInfo.creditCard || !paymentInfo.creditCard.number ||!paymentInfo.creditCard.securityCode ||  !paymentInfo.creditCard.expirationDate || !paymentInfo.creditCard.brand || !paymentInfo.creditCard.holder)
-      return res.status(400).send({ error: "Credit card info not provided" });
-    const { creditCard } = paymentInfo;
     
-    const response  = await api.post('/1/sales', {
-      "MerchantOrderId":"2014111703",
-      "Customer":{
-         "Name": user.name
+    //to fix card brand not provided on development
+    if(!paymentInfo.creditCard.brand) paymentInfo.creditCard.brand = "visa"
+
+    if (!paymentInfo || !newCredits ||!newCredits.installments) return res.status(400).send({ error: "Payment info or new credits not provided" });
+    if (!user || !user.id || !user.first_name) return res.status(400).send({ error: "User info not provided" });
+    if (!paymentInfo.creditCard || !paymentInfo.creditCard.number || !paymentInfo.creditCard.securityCode || !paymentInfo.creditCard.expirationDate || !paymentInfo.creditCard.brand || !paymentInfo.creditCard.holder)
+      return res.status(400).send({ error: "Credit card info not provided" });
+
+      newCredits.price = (newCredits.price).replace("R$", "");
+      newCredits.price = (newCredits.price).replace(",", "");
+
+
+    let userExists = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    if (!userExists || userExists.length <= 0) return res.status(400).send({ error: "User not found" });
+    const { creditCard } = paymentInfo;
+
+    const response = await api.post('/1/sales', {
+      "MerchantOrderId": "2014111703",
+      "Customer": {
+        "Name": user.first_name
       },
-      "Payment":{
-        "Type":"CreditCard",
-        "Amount": newCredits,
-        "Installments":1,
-        "SoftDescriptor":"123456789ABCD",
-        "CreditCard":{
-            "CardNumber": creditCard.number,
-            "Holder": creditCard.holder,
-            "ExpirationDate": creditCard.expirationDate,
-            "SecurityCode": creditCard.securityCode,
-            "Brand": creditCard.brand
+      "Payment": {
+        "Type": "CreditCard",
+        "Amount": newCredits.price,
+        "Installments": newCredits.installments,
+        "SoftDescriptor": "123456789ABCD",
+        "CreditCard": {
+          "CardNumber": creditCard.number,
+          "Holder": creditCard.holder,
+          "ExpirationDate": creditCard.expirationDate,
+          "SecurityCode": creditCard.securityCode,
+          "Brand": creditCard.brand || "Visa"
         },
         "IsCryptoCurrencyNegotiation": true
       }
-   })
+    })
 
-   console.log(chalk.yellow(JSON.stringify(response.data)));
+    console.log(chalk.yellow(JSON.stringify(response.data)));
 
-   const { Status, ReturnCode, ReturnMessage, PaymentId, Tid, AuthorizationCode } = response.data.Payment
+    const { Status, ReturnCode, ReturnMessage, PaymentId, Tid, AuthorizationCode } = response.data.Payment
 
-   if(Status !== 1){
-     return res.status(401).json({
-      Status,
-      Tid,
-      ReturnCode, 
-      ReturnMessage, 
-      PaymentId,
-      AuthorizationCode
-     })
-   }
+    if (Status !== 1) {
+      return res.status(401).json({
+        Status,
+        Tid,
+        ReturnCode,
+        ReturnMessage,
+        PaymentId,
+        AuthorizationCode
+      })
+    }
 
-   const capture = await api.put(`/1/sales/${PaymentId}/capture`)
+    const capture = await api.put(`/1/sales/${PaymentId}/capture`)
 
-   if(!capture.data.Status === 2){
-      await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isClassCredits, buyValue ) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id+ "', '" + PaymentId + "', '" + 0 + "', '" + 1 + "', '" + newCredits + "')");
+    if (!capture.data.Status === 2) {
+      await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isClassCredits, buyValue ) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id + "', '" + PaymentId + "', '" + 0 + "', '" + 1 + "', '" + newCredits.price + "')");
       return res.status(401).json({
         error: 'Error for capture transaction',
         data: capture.data
       })
-   }
-    
-    await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isClassCredits, buyValue) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id+ "', '" + PaymentId + "', '" + 1 + "', '" + 1 + "', '" + newCredits + "')");
-    
+    }
+
+    await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isClassCredits, buyValue) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id + "', '" + PaymentId + "', '" + 1 + "', '" + 1 + "', '" + newCredits.price + "')");
+
     let credits = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
     credits = parseInt(credits[0].classes_credits);
-    newCredits = parseInt(newCredits);
-    credits = await execSQL("UPDATE users SET classes_credits= '" + (credits + newCredits) + "' WHERE id= '" + user.id + "' ");
+    newCredits.credits = parseInt(newCredits.credits);
+    credits = await execSQL("UPDATE users SET classes_credits= '" + (credits + newCredits.credits) + "' WHERE id= '" + user.id + "' ");
     user = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
     user = user[0]
     // Retorna os dados do usuário e o new token para ser usado na próxima requisição
@@ -279,28 +290,39 @@ router.post("/buy_consultations_credits", async (req, res) => {
   console.log(chalk.magenta(JSON.stringify(req.body)));
   try {
     let { paymentInfo, user, newCredits } = req.body;
-    if (!paymentInfo || !newCredits) return res.status(400).send({ error: "Payment info or new credits not provided" });
-    if (!user || !user.id) return res.status(400).send({ error: "User info not provided" });
-    if (!paymentInfo.creditCard || !paymentInfo.creditCard.number ||!paymentInfo.creditCard.securityCode ||  !paymentInfo.creditCard.expirationDate || !paymentInfo.creditCard.brand || !paymentInfo.creditCard.holder)
-      return res.status(400).send({ error: "Credit card info not provided" });
-    const { creditCard } = paymentInfo;
     
-    const transaction  = await api.post('/1/sales', {
-      "MerchantOrderId":"2014111703",
-      "Customer":{
-         "Name": user.name
+    //to fix card brand not provided on development
+    if(!paymentInfo.creditCard.brand) paymentInfo.creditCard.brand = "visa"
+
+    if (!paymentInfo || !newCredits ||!newCredits.installments) return res.status(400).send({ error: "Payment info or new credits not provided" });
+    if (!user || !user.id || !user.first_name) return res.status(400).send({ error: "User info not provided" });
+    if (!paymentInfo.creditCard || !paymentInfo.creditCard.number || !paymentInfo.creditCard.securityCode || !paymentInfo.creditCard.expirationDate || !paymentInfo.creditCard.brand || !paymentInfo.creditCard.holder)
+      return res.status(400).send({ error: "Credit card info not provided" });
+
+      newCredits.price = (newCredits.price).replace("R$", "");
+      newCredits.price = (newCredits.price).replace(",", "");
+
+
+    let userExists = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
+    if (!userExists || userExists.length <= 0) return res.status(400).send({ error: "User not found" });
+    const { creditCard } = paymentInfo;
+
+    const response = await api.post('/1/sales', {
+      "MerchantOrderId": "2014111703",
+      "Customer": {
+        "Name": user.first_name
       },
-      "Payment":{
-        "Type":"CreditCard",
-        "Amount": newCredits,
-        "Installments":1,
-        "SoftDescriptor":"123456789ABCD",
-        "CreditCard":{
-            "CardNumber": creditCard.number,
-            "Holder": creditCard.holder,
-            "ExpirationDate": creditCard.expirationDate,
-            "SecurityCode": creditCard.securityCode,
-            "Brand": creditCard.brand
+      "Payment": {
+        "Type": "CreditCard",
+        "Amount": newCredits.price,
+        "Installments": newCredits.installments,
+        "SoftDescriptor": "123456789ABCD",
+        "CreditCard": {
+          "CardNumber": creditCard.number,
+          "Holder": creditCard.holder,
+          "ExpirationDate": creditCard.expirationDate,
+          "SecurityCode": creditCard.securityCode,
+          "Brand": creditCard.brand || "Visa"
         },
         "IsCryptoCurrencyNegotiation": true
       }
@@ -310,12 +332,12 @@ router.post("/buy_consultations_credits", async (req, res) => {
 
     const { Status, ReturnCode, ReturnMessage, PaymentId, Tid, AuthorizationCode } = transaction.data.Payment
 
-    if(Status !== 1){
+    if (Status !== 1) {
       return res.status(401).json({
         Status,
         Tid,
-        ReturnCode, 
-        ReturnMessage, 
+        ReturnCode,
+        ReturnMessage,
         PaymentId,
         AuthorizationCode
       })
@@ -323,22 +345,22 @@ router.post("/buy_consultations_credits", async (req, res) => {
 
     const capture = await api.put(`/1/sales/${PaymentId}/capture`)
 
-    if(!capture.data.status === 2){
-      await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isConsultationCredits, buyValue ) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id+ "', '" + PaymentId + "', '" + 0 + "', '" + 1 + "', '" + newCredits+ "')");
+    if (!capture.data.status === 2) {
+      await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isConsultationCredits, buyValue ) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id + "', '" + PaymentId + "', '" + 0 + "', '" + 1 + "', '" + newCredits.price + "')");
       return res.status(401).json({
         error: 'Error for capture transaction',
         data: capture.data
       })
-   }
-    
-    await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isConsultationCredits, buyValue) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id+ "', '" + PaymentId + "', '" + 1 + "', '" + 1 + "', '" + newCredits + "')");
-    
+    }
+
+    await execSQL("INSERT INTO transactions (tid, status, authorizationCode, returnCode, returnMessage, id_client, paymentId, capture, isConsultationCredits, buyValue) VALUES ('" + Tid + "', '" + Status + "', '" + AuthorizationCode + "', '" + ReturnCode + "', '" + ReturnMessage + "', '" + user.id + "', '" + PaymentId + "', '" + 1 + "', '" + 1 + "', '" + newCredits.price + "')");
+
     console.log(chalk.green(JSON.stringify(capture.data)));
 
     let credits = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
     credits = parseInt(credits[0].consultations_credits);
-    newCredits = parseInt(newCredits);
-    credits = await execSQL("UPDATE users SET consultations_credits= '" + (credits + newCredits) + "' WHERE id= '" + user.id + "' ");
+    newCredits = parseInt(newCredits.credits);
+    credits = await execSQL("UPDATE users SET consultations_credits= '" + (credits + newCredits.credits) + "' WHERE id= '" + user.id + "' ");
     user = await execSQL("SELECT * FROM users WHERE id='" + user.id + "' ");
     user = user[0]
     // Retorna os dados do usuário e o new token para ser usado na próxima requisição
