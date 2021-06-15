@@ -23,6 +23,8 @@ require('./controllers/credits.controller')(app);
 require('./controllers/notices.controller')(app);
 require('./controllers/available_times.controller')(app);
 require('./controllers/default_times.controller')(app);
+require('./controllers/cancellations.controller')(app);
+require('./controllers/transactions.controller')(app);
 
 let port = process.env.PORT || 3030;
 
