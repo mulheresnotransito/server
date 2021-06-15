@@ -32,6 +32,33 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/get_detailed_consultations", async (req, res) => {
+  console.log(chalk.bgMagenta('[ get /consultations/get_detailed_consultations - consultations.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+    let consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
+      + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
+      + " FROM consultations"
+      + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
+      + " INNER JOIN users ON users.id=consultations.id_user_psychologist"));
+      let users = (await execSQL("SELECT users.first_name as user_name, users.last_name as user_last_name, users.email as user_email, users.id as user_id"
+        + " FROM consultations"
+        + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
+        + " INNER JOIN users ON users.id=consultations.id_user_client"));
+        consultations = consultations.map((item, index) => {
+          item.user = users[index];
+          return item;
+        })
+
+    return res.send({ consultations })
+
+  } catch (error) {
+    console.log({ error });
+    return res.status(400).send({ error })
+  }
+});
+
 
 router.post("/schedule", async (req, res) => {
   console.log(chalk.bgMagenta('[ post /consultations/schedule - consultations.controller ]'));

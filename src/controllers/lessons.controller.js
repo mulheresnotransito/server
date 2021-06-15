@@ -39,6 +39,33 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/get_detailed_lessons", async (req, res) => {
+  console.log(chalk.bgMagenta('[ get /lessons/get_detailed_lessons - lessons.controller ]'));
+  console.log(chalk.magenta(JSON.stringify(req.body)));
+  try {
+    let lessons = (await execSQL("SELECT lessons.id, lessons.date, starting_point, description, id_user_client"
+      + ", id_user_driver, date, status,  default_times.initial_hour, default_times.end_hour  "
+      + ", users.first_name as driver_name, users.last_name as driver_last_name, users.email as driver_email"
+      + " FROM lessons"
+      + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+      + " INNER JOIN users ON users.id=lessons.id_user_driver"));
+      let users = (await execSQL("SELECT users.first_name as user_name, users.last_name as user_last_name, users.email as user_email, users.id as user_id"
+        + " FROM lessons"
+        + " INNER JOIN default_times ON default_times.id=lessons.id_default_time"
+        + " INNER JOIN users ON users.id=lessons.id_user_client"));
+        lessons = lessons.map((item, index) => {
+          item.user = users[index];
+          return item;
+        })
+
+    return res.send({ lessons })
+
+  } catch (error) {
+    console.log({ error });
+    return res.status(400).send({ error })
+  }
+});
+
 router.post("/cancel", async (req, res) => {
   console.log(chalk.bgMagenta('[ post /lessons/cancel - lessons.controller ]'));
   console.log(chalk.magenta(JSON.stringify(req.body)));
