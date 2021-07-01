@@ -2,8 +2,8 @@ const axios = require("axios");
 
 const apiQueryUrl = 'https://apiquerysandbox.cieloecommerce.cielo.com.br'
 const apiUrl = 'https://apisandbox.cieloecommerce.cielo.com.br'
-const merchantId = 'e4c60d32-691b-44fd-b4bc-03f081360871'
-const merchantKey = 'FWWZYEATMZGCEWDJYHQKVPVRAKLYWDAQIBPDRWCB'
+const merchantId = process.env.CIELO_MERCHANT_ID;
+const merchantKey = process.env.CIELO_MERCHANT_KEY
 
 const apiQuery = axios.create({
   baseURL: apiQueryUrl,
