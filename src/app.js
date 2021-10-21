@@ -25,6 +25,7 @@ require('./controllers/available_times.controller')(app);
 require('./controllers/default_times.controller')(app);
 require('./controllers/cancellations.controller')(app);
 require('./controllers/transactions.controller')(app);
+require('./controllers/calls.controller')(app);
 
 let port = process.env.PORT || 3030;
 

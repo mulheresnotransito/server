@@ -74,24 +74,24 @@ router.post("/schedule", async (req, res) => {
     let id_user_psychologist = psychologist.id;
     let now = new Date();
 
-    let new_consultation = await execSQL("INSERT INTO consultations (id_user_client, id_user_psychologist, date, status, updated_at, id_default_time) VALUES ('" + id_user_client + "', '" + id_user_psychologist + "', '" + date + "', 'scheduled', '" + now + "', '" + id_default_time + "' )");
+    let new_consultation = await execSQL("INSERT INTO consultations (id_user_client, id_user_psychologist, date, status, updated_at, id_default_time, channel_name) VALUES ('" + id_user_client + "', '" + id_user_psychologist + "', '" + date + "', 'scheduled', '" + now + "', '" + id_default_time + "', '"+ _generateHash() + "' )");
 
     if (!new_consultation) return res.send({ error: "Não foi possível agendar a consulta" });
 
-    new_consultation = (await execSQL("SELECT consultations.id, description, id_user_client"
+    new_consultation = (await execSQL("SELECT consultations.id, channel_name, description, id_user_client"
       + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
       + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
       + " FROM consultations"
       + " INNER JOIN default_times ON default_times.id=consultations.id_default_time"
       + " INNER JOIN users ON users.id=consultations.id_user_psychologist"
-      + " WHERE id='" + new_consultation.insertId + "' "))[0];
+      + " WHERE consultations.id='" + new_consultation.insertId + "' "))[0];
 
     let credits = await execSQL("SELECT consultations_credits FROM users WHERE id='" + id_user_client + "' ");
     credits = parseInt(credits[0].consultations_credits);
     credits = credits - 1;
     let new_credits = await execSQL("UPDATE users SET consultations_credits='" + (credits) + "' WHERE id= '" + id_user_client + "' ");
 
-    let scheduled_consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
+    let scheduled_consultations = (await execSQL("SELECT consultations.id, channel_name, description, id_user_client"
       + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
       + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
       + " FROM consultations"
@@ -200,7 +200,7 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
 
     // let consultations = await execSQL("SELECT * FROM consultations INNER JOIN default_times ON default_times.id=consultations.id_default_time WHERE id_user_client = '" + user.id + "'");
 
-    let consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
+    let consultations = (await execSQL("SELECT consultations.id, channel_name, description, id_user_client"
       + ", id_user_psychologist, date, status, default_times.initial_hour, default_times.end_hour  "
       + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
       + " FROM consultations"
@@ -238,7 +238,7 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
 
     // let consultations = await execSQL("SELECT * FROM consultations INNER JOIN default_times ON default_times.id=consultations.id_default_time WHERE id_user_client = '" + user.id + "'");
 
-    let scheduled_consultations = (await execSQL("SELECT consultations.id, description, id_user_client"
+    let scheduled_consultations = (await execSQL("SELECT consultations.id, channel_name, description, id_user_client"
       + ", id_user_psychologist, date, status,  default_times.initial_hour, default_times.end_hour  "
       + ", users.first_name as psychologist_name, users.last_name as psychologist_last_name, users.email as psychologist_email"
       + " FROM consultations"
@@ -266,6 +266,9 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
 });
 
 
+const _generateHash = () =>{
+  return Math.random().toString(36).substr(2); 
+};
 
 
 module.exports = (app) => app.use("/consultations", router);

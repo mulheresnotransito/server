@@ -18,13 +18,15 @@
   },
   "homepage": "https://github.com/caiocosta08/mnt-back-end#readme",
   "dependencies": {
-    "axios": "^0.21.1",
+    "agora-access-token": "^2.0.4",
+    "axios": "^0.21.4",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "md5": "^2.3.0",
-    "mysql2": "^2.2.5"
+    "mysql2": "^2.2.5",
+    "uuid": "^8.3.2"
   }
 }
