@@ -14,6 +14,7 @@
 
 
 -- Copiando estrutura do banco de dados para db_mnt
+DROP DATABASE IF EXISTS `db_mnt`;
 CREATE DATABASE IF NOT EXISTS `db_mnt` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 USE `db_mnt`;
 
@@ -116,18 +117,21 @@ CREATE TABLE IF NOT EXISTS `consultations` (
   `updated_at` varchar(100) NOT NULL,
   `status` varchar(50) NOT NULL,
   `id_default_time` varchar(11) NOT NULL DEFAULT '',
+  `channel_name` varchar(200) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
 
--- Copiando dados para a tabela db_mnt.consultations: 6 rows
+-- Copiando dados para a tabela db_mnt.consultations: 7 rows
 /*!40000 ALTER TABLE `consultations` DISABLE KEYS */;
-INSERT INTO `consultations` (`id`, `description`, `id_user_client`, `id_user_psychologist`, `date`, `updated_at`, `status`, `id_default_time`) VALUES
-	(1, 'description test...', 1, 2, '15/05/2021', 'Thu May 06 2021 10:57:17 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '1'),
-	(2, 'Consulta 02', 1, 2, '15/05/2021', 'Thu May 06 2021 10:53:48 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '2'),
-	(3, 'description test...', 1, 2, '15/05/2021', 'Thu May 06 2021 10:32:40 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '3'),
-	(4, 'consultation test', 1, 2, '15/05/2021', 'Thu May 06 2021 10:32:21 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '4'),
-	(5, 'consultation test 2', 1, 2, '15/05/2021', 'Thu May 06 2021 10:31:51 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '5'),
-	(6, 'consultation test 2', 1, 2, '15/05/2021', 'Thu May 06 2021 14:34:06 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '6');
+INSERT INTO `consultations` (`id`, `description`, `id_user_client`, `id_user_psychologist`, `date`, `updated_at`, `status`, `id_default_time`, `channel_name`) VALUES
+	(1, 'description test...', 1, 2, '15/05/2021', 'Thu May 06 2021 10:57:17 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '1', ''),
+	(2, 'Consulta 02', 1, 2, '15/05/2021', 'Thu May 06 2021 10:53:48 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '2', ''),
+	(3, 'description test...', 1, 2, '15/05/2021', 'Thu May 06 2021 10:32:40 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '3', ''),
+	(4, 'consultation test', 1, 2, '15/05/2021', 'Thu May 06 2021 10:32:21 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '4', ''),
+	(5, 'consultation test 2', 1, 2, '15/05/2021', 'Thu May 06 2021 10:31:51 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '5', ''),
+	(6, 'consultation test 2', 1, 2, '15/05/2021', 'Thu May 06 2021 14:34:06 GMT-0300 (Horário Padrão de Brasília)', 'canceled', '6', ''),
+	(25, NULL, 10, 8, '15/10/2021', 'Sun Oct 24 2021 01:43:39 GMT-0300 (Horário Padrão de Brasília)', 'scheduled', '1', 'a59rk4ccdlh'),
+	(24, NULL, 10, 8, '15/10/2021', 'Thu Oct 21 2021 13:11:53 GMT-0300 (Horário Padrão de Brasília)', 'scheduled', '1', '9iyk7g5qvoq');
 /*!40000 ALTER TABLE `consultations` ENABLE KEYS */;
 
 -- Copiando estrutura para tabela db_mnt.credits
@@ -229,9 +233,9 @@ CREATE TABLE IF NOT EXISTS `notices` (
   `text` longtext NOT NULL,
   `description` longtext DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
--- Copiando dados para a tabela db_mnt.notices: 7 rows
+-- Copiando dados para a tabela db_mnt.notices: 12 rows
 /*!40000 ALTER TABLE `notices` DISABLE KEYS */;
 INSERT INTO `notices` (`id`, `title`, `text`, `description`) VALUES
 	(1, 'Notícia teste 1', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the indust'),
@@ -240,7 +244,12 @@ INSERT INTO `notices` (`id`, `title`, `text`, `description`) VALUES
 	(4, 'Notícia teste 4', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the indust'),
 	(5, 'Notícia teste 5', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the indust'),
 	(6, 'Notícia teste 6', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the indust'),
-	(7, 'Notícia teste 7', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'asdasdasdas');
+	(7, 'Notícia teste 7', 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.', 'asdasdasdas'),
+	(8, 'Teste', 'Fork from https://javascript.info/alert-prompt-confirm', 'jjkn'),
+	(9, 'Teste', 'jjkn', 'Fork from https://javascript.info/alert-prompt-confirm'),
+	(10, 'Teste', 'jjkn', 'Fork from https://javascript.info/alert-prompt-confirm'),
+	(11, 'Teste', 'jjkn', 'Fork from https://javascript.info/alert-prompt-confirm'),
+	(12, 'Teste', 'jjkn', 'Fork from https://javascript.info/alert-prompt-confirm');
 /*!40000 ALTER TABLE `notices` ENABLE KEYS */;
 
 -- Copiando estrutura para tabela db_mnt.payments
@@ -274,13 +283,15 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   `buyValue` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Copiando dados para a tabela db_mnt.transactions: ~0 rows (aproximadamente)
+-- Copiando dados para a tabela db_mnt.transactions: ~6 rows (aproximadamente)
 /*!40000 ALTER TABLE `transactions` DISABLE KEYS */;
 INSERT INTO `transactions` (`tid`, `status`, `authorizationCode`, `returnCode`, `returnMessage`, `id_client`, `capture`, `paymentId`, `isClassCredits`, `isConsultationCredits`, `buyValue`) VALUES
 	('0528012626357', 1, '741656', '4', 'Operation Successful', '1', 1, '97bfd5c7-f59e-4933-8859-ccca2db53ca8', 0, 1, 12300),
 	('0528012723232', 1, '740831', '4', 'Operation Successful', '1', 1, 'd87d33e9-dbbb-4117-8133-ce1a95a9e942', 0, 1, 12300),
 	('0528013152038', 1, '519532', '4', 'Operation Successful', '1', 1, '172ba571-3dc2-45c2-8f00-46025806f5a8', 1, 0, 1200),
-	('0528013212243', 1, '533626', '4', 'Operation Successful', '1', 1, '97653220-e233-417a-bcad-ecae9d636ff2', 1, 0, 1200);
+	('0528013212243', 1, '533626', '4', 'Operation Successful', '1', 1, '97653220-e233-417a-bcad-ecae9d636ff2', 1, 0, 1200),
+	('0528014537914', 1, '422812', '4', 'Operation Successful', '1', 1, '0f5a233d-182a-48ba-b812-3f6ce96553bb', 1, 0, 1200),
+	('0528015526023', 1, '364781', '4', 'Operation Successful', '1', 1, '71b25e99-3f23-4d94-aa42-48d72b39ef08', 0, 1, 12300);
 /*!40000 ALTER TABLE `transactions` ENABLE KEYS */;
 
 -- Copiando estrutura para tabela db_mnt.users
@@ -304,17 +315,16 @@ CREATE TABLE IF NOT EXISTS `users` (
   `profile_photo` varchar(100) NOT NULL DEFAULT '',
   `balance` varchar(50) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
 
--- Copiando dados para a tabela db_mnt.users: 28 rows
+-- Copiando dados para a tabela db_mnt.users: 24 rows
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `password`, `birthday`, `sex`, `language`, `country`, `is_client`, `is_psychologist`, `is_driver`, `is_logged`, `classes_credits`, `consultations_credits`, `profile_photo`, `balance`) VALUES
-	(1, 'Joana', 'Maria', 'cliente@teste', '123', '07/09/1998', 'male', 'portuguese', 'brazil', 1, 0, 0, 'true', '2424', '12321', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(2, 'Marta', 'Vieira', 'psicologa@teste', '123', '01/01/1990', 'female', 'portuguese', 'brazil', 0, 1, 0, 'false', '44', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(3, 'Bianca', 'Silva', 'motorista@teste', '123', '01/01/1990', 'male', 'portuguese', 'brazil', 0, 0, 1, 'false', '2', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(8, 'teste', 'teste', 'teste', 'teste', '07/09/1998', 'male', 'portuguese', 'brazil', 1, 1, 1, 'true', '10', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(9, 'Maria', 'Saramalho', 'maria@mnt.com', '123', '01/01/1990', 'female', 'portuguese', 'brazil', 0, 0, 1, 'false', '4', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
-	(10, 'undefined', 'undefined', 'caio@caio.com', '123', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, NULL, '33', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
+	(10, 'undefined', 'undefined', 'caio@caio.com', '123', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, NULL, '33', '-3', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(11, 'caio', 'caio', 'caio', '123', '07/09', 'male', 'portuguese', 'brazil', 1, 0, 0, 'true', '22', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(12, 'A', 'a', 'A', 'A', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, 'true', '11', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(13, 'E', 'e', 'E', 'E', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, NULL, '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
@@ -322,9 +332,7 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `password`, `birt
 	(15, 'G', 'g', 'G', 'G', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, NULL, '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(16, 'Gd', 'd', 'Gd', 'Gd', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, NULL, '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(17, 'F', 'F', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 1, 0, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
-	(18, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(19, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
-	(20, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(21, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(22, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(23, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
@@ -335,8 +343,7 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `password`, `birt
 	(28, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(29, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
 	(30, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
-	(31, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0'),
-	(32, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0');
+	(31, 'Psychologist', 'Temporary', 'F', 'f', 'undefined', 'undefined', 'undefined', 'undefined', 0, 1, 0, 'true', '0', '0', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fG', '0');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
