@@ -105,6 +105,8 @@ router.post("/cancel", async (req, res) => {
       console.log(l.date)
       l.type = "lesson";
       l.temp_date = l.date.split("/");
+      l.temp_hour = l.initial_hour.split(":");
+      l.next_appointments = new Date(l.temp_date[2], l.temp_date[1], l.temp_date[0], l.temp_hour[0], l.temp_hour[1]);
       return l
     })
 
@@ -145,6 +147,8 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
       console.log(l.date)
       l.type = "lesson";
       l.temp_date = l.date.split("/");
+      l.temp_hour = l.initial_hour.split(":");
+      l.next_appointments = new Date(l.temp_date[2], l.temp_date[1], l.temp_date[0], l.temp_hour[0], l.temp_hour[1]);
       return l
     })
 
@@ -186,6 +190,8 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
       console.log(l.date)
       l.type = "lesson";
       l.temp_date = l.date.split("/");
+      l.temp_hour = l.initial_hour.split(":");
+      l.next_appointments = new Date(l.temp_date[2], l.temp_date[1], l.temp_date[0], l.temp_hour[0], l.temp_hour[1]);
       return l
     })
 
@@ -276,6 +282,8 @@ router.post("/schedule", async (req, res) => {
         console.log(l.date)
         l.type = "lesson";
         l.temp_date = l.date.split("/");
+        l.temp_hour = l.initial_hour.split(":");
+        l.next_appointments = new Date(l.temp_date[2], l.temp_date[1], l.temp_date[0], l.temp_hour[0], l.temp_hour[1]);
         return l
       })
   

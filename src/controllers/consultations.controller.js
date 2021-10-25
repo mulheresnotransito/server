@@ -102,9 +102,12 @@ router.post("/schedule", async (req, res) => {
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
       c.temp_date = c.date.split("/");
+      c.temp_hour = c.initial_hour.split(":");
+      c.next_appointments = new Date(c.temp_date[2], c.temp_date[1], c.temp_date[0], c.temp_hour[0], c.temp_hour[1]);
       return c
     })
     // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
+
     scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.temp_date[2], b.temp_date[1], b.temp_date[0]) - new Date(a.temp_date[2], a.temp_date[1], a.temp_date[0])).reverse()
 
     return res.send({ scheduled_consultations, consultations_credits: credits, last_consultations_scheduled: new_consultation });
@@ -175,6 +178,8 @@ router.post("/cancel", async (req, res) => {
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
       c.temp_date = c.date.split("/");
+      c.temp_hour = c.initial_hour.split(":");
+      c.next_appointments = new Date(c.temp_date[2], c.temp_date[1], c.temp_date[0], c.temp_hour[0], c.temp_hour[1]);
       return c
     })
     // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
@@ -213,6 +218,8 @@ router.post("/get_all_by_id_user_client", async (req, res) => {
     consultations = consultations.map(c => {
       c.type = "consultation";
       c.temp_date = c.date.split("/");
+      c.temp_hour = c.initial_hour.split(":");
+      c.next_appointments = new Date(c.temp_date[2], c.temp_date[1], c.temp_date[0], c.temp_hour[0], c.temp_hour[1]);
       return c
     })
     // consultations = consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()
@@ -251,6 +258,8 @@ router.post("/get_all_scheduled_by_id_user_client", async (req, res) => {
     scheduled_consultations = scheduled_consultations.map(c => {
       c.type = "consultation";
       c.temp_date = c.date.split("/");
+      c.temp_hour = c.initial_hour.split(":");
+      c.next_appointments = new Date(c.temp_date[2], c.temp_date[1], c.temp_date[0], c.temp_hour[0], c.temp_hour[1]);
       return c
     })
     // scheduled_consultations = scheduled_consultations.sort((a, b) => new Date(b.date) - new Date(a.date)).reverse()

@@ -1,0 +1,107 @@
+[
+    {
+        "code": "001",
+        "message": "Router error",
+        "module": "available_times"
+    },
+    {
+        "code": "002",
+        "message": "Router error",
+        "module": "available_times"
+    },
+    {
+        "code": "003",
+        "message": "user_id não fornecido",
+        "module": "available_times"
+    },
+    {
+        "code": "004",
+        "message": "Router error",
+        "module": "available_times"
+    },
+    {
+        "code": "005",
+        "message": "user_id ou available_times não fornecidos",
+        "module": "available_times"
+    },
+    {
+        "code": "006",
+        "message": "Router error",
+        "module": "available_times"
+    },
+    {
+        "code": "007",
+        "message": "user_id ou id_available_time não fornecidos",
+        "module": "available_times"
+    },
+    {
+        "code": "008",
+        "message": "Erro ao remover horário disponível",
+        "module": "available_times"
+    },
+    {
+        "code": "009",
+        "message": "Router error",
+        "module": "available_times"
+    },
+    {
+        "code": "010",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "011",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "012",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "013",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "014",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "015",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "016",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "017",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "018",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "019",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "020",
+        "message": "",
+        "module": "available_times"
+    },
+    {
+        "code": "021",
+        "message": "",
+        "module": "available_times"
+    }
+]
